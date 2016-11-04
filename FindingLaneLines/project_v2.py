@@ -94,10 +94,10 @@ def weighted_img(img, initial_img, α=0.8, β=1., λ=0.):
 def main():
     # reading in an image
     #image = (mpimg.imread('test_images/solidWhiteRight.jpg') * 255).astype('uint8')
-    # image = (mpimg.imread('test_images/solidWhiteCurve.jpg') * 255).astype('uint8')
-    # image = (mpimg.imread('test_images/solidYellowCurve.jpg') * 255).astype('uint8')
-    # image = (mpimg.imread('test_images/solidYellowCurve2.jpg') * 255).astype('uint8')
-    # image = (mpimg.imread('test_images/solidYellowLeft.jpg') * 255).astype('uint8')
+    #image = (mpimg.imread('test_images/solidWhiteCurve.jpg') * 255).astype('uint8')
+    #image = (mpimg.imread('test_images/solidYellowCurve.jpg') * 255).astype('uint8')
+    #image = (mpimg.imread('test_images/solidYellowCurve2.jpg') * 255).astype('uint8')
+    #image = (mpimg.imread('test_images/solidYellowLeft.jpg') * 255).astype('uint8')
     image = (mpimg.imread('test_images/whiteCarLaneSwitch.jpg') * 255).astype('uint8')
 
     # printing out some stats and plotting
@@ -109,7 +109,7 @@ def main():
     # plt.imshow(blur_gray, cmap='gray')
 
     # Define our parameters for Canny and apply
-    low_threshold = 50 #50
+    low_threshold = 45 #50
     high_threshold = 150 #150
     edges = canny(blur_gray, low_threshold, high_threshold)
 
@@ -119,14 +119,13 @@ def main():
     vertices = np.array([[(0,imshape[0]),(450, 330), (490, 310), (imshape[1],imshape[0])]], dtype=np.int32)    
     masked_edges = region_of_interest(edges, vertices)
 
-    # plt.imshow(masked_edges)
     # Define the Hough transform parameters
     # Make a blank the same size as our image to draw on
-    rho = 2 # distance resolution in pixels of the Hough grid
+    rho = 1 # distance resolution in pixels of the Hough grid
     theta = np.pi/180 # angular resolution in radians of the Hough grid
-    threshold = 15     # minimum number of votes (intersections in Hough grid cell)
-    min_line_length = 40 #minimum number of pixels making up a line
-    max_line_gap = 20    # maximum gap in pixels between connectable line segments
+    threshold = 15    # minimum number of votes (intersections in Hough grid cell)
+    min_line_length = 40 #minimum number of pixels making up a line 150 - 40
+    max_line_gap = 130 # maximum gap in pixels between connectable line segments 58 -95
     line_image = np.copy(image)*0 # creating a blank to draw lines on
 
     lines = hough_lines(masked_edges, rho, theta, threshold, min_line_length, max_line_gap)
@@ -135,7 +134,7 @@ def main():
     lines_edges = weighted_img(lines, image)
 
     # Save image to test
-    cv2.imwrite('test_images/result.jpg',lines_edges)
+    cv2.imwrite('test_images/whiteCarLaneSwitchResult.jpg',lines_edges)
     plt.imshow(lines_edges)
     plt.show()
 
