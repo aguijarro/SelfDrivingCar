@@ -1,3 +1,5 @@
+# Code provide by Udacity - SelfDriving Nanodegree - Project 1
+# Changes are implemented by Andres Guijarro.
 # importing some useful packages
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
