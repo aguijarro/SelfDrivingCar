@@ -4,6 +4,10 @@ import matplotlib.image as mpimg
 import numpy as np
 import cv2
 import math
+
+# Import everything needed to edit/save/watch video clips
+from moviepy.editor import VideoFileClip
+from IPython.display import HTML
 # %matplotlib inline
 
 
@@ -90,16 +94,7 @@ def weighted_img(img, initial_img, α=0.8, β=1., λ=0.):
     """
     return cv2.addWeighted(initial_img, α, img, β, λ)
 
-
-def main():
-    # reading in an image
-    #image = (mpimg.imread('test_images/solidWhiteRight.jpg') * 255).astype('uint8')
-    #image = (mpimg.imread('test_images/solidWhiteCurve.jpg') * 255).astype('uint8')
-    #image = (mpimg.imread('test_images/solidYellowCurve.jpg') * 255).astype('uint8')
-    #image = (mpimg.imread('test_images/solidYellowCurve2.jpg') * 255).astype('uint8')
-    #image = (mpimg.imread('test_images/solidYellowLeft.jpg') * 255).astype('uint8')
-    image = (mpimg.imread('test_images/whiteCarLaneSwitch.jpg') * 255).astype('uint8')
-
+def process_image(image):
     # printing out some stats and plotting
     print('This image is:', type(image), 'with dimesions:', image.shape)
     gray = grayscale(image)
@@ -129,14 +124,33 @@ def main():
     line_image = np.copy(image)*0 # creating a blank to draw lines on
 
     lines = hough_lines(masked_edges, rho, theta, threshold, min_line_length, max_line_gap)
-
     # Draw the lines on the edge image
     lines_edges = weighted_img(lines, image)
+    return lines_edges
 
-    # Save image to test
-    cv2.imwrite('test_images/whiteCarLaneSwitchResult.jpg',lines_edges)
-    plt.imshow(lines_edges)
+def main():
+    # reading in an image
+    #image = (mpimg.imread('test_images/solidWhiteRight.jpg') * 255).astype('uint8')
+    #image = (mpimg.imread('test_images/solidWhiteCurve.jpg') * 255).astype('uint8')
+    #image = (mpimg.imread('test_images/solidYellowCurve.jpg') * 255).astype('uint8')
+    #image = (mpimg.imread('test_images/solidYellowCurve2.jpg') * 255).astype('uint8')
+    #image = (mpimg.imread('test_images/solidYellowLeft.jpg') * 255).astype('uint8')
+    image = (mpimg.imread('test_images/whiteCarLaneSwitch.jpg') * 255).astype('uint8')
+    processImage = process_image(image)
+    plt.imshow(processImage)
     plt.show()
+
+    # Make video
+    white_output = 'white.mp4'
+    clip1 = VideoFileClip("solidWhiteRight.mp4")
+    white_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
+    white_clip.write_videofile(white_output, audio=False)
+
+    # Make video
+    yellow_output = 'yellow.mp4'
+    clip2 = VideoFileClip('solidYellowLeft.mp4')
+    yellow_clip = clip2.fl_image(process_image)
+    yellow_clip.write_videofile(yellow_output, audio=False)
 
 if __name__ == '__main__':
     main()
