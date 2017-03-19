@@ -5,6 +5,21 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 
+# Define a function that thresholds the S-channel of HLS
+# Use exclusive lower bound (>) and inclusive upper (<=)
+def hls_select(image, thresh=(0, 255)):
+    # 1) Convert to HLS color space
+    hls = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+    H = hls[:, :, 0]
+    L = hls[:, :, 1]
+    S = hls[:, :, 2]
+    # 2) Apply a threshold to the S channel
+    thresh = (90, 255)
+    binary = np.zeros_like(S)
+    binary[(S > thresh[0]) & (S <= thresh[1])] = 1
+    # 3) Return a binary image of threshold result
+    return binary
+
 
 # Define a function that applies Sobel x and y,
 # then computes the direction of the gradient
@@ -128,8 +143,6 @@ def draw_images(img, undistorted, title, cmap):
     plt.show()
 
 
-#ax2.imshow(grad_binary, cmap='gray')
-
 # TODO: Write a function that takes an image, object points, and image points
 # performs the camera calibration, image distortion correction and
 # returns the undistorted image
@@ -194,6 +207,7 @@ def main():
 
     # Read in an image and grayscale it
     image = mpimg.imread('calibration_wide/signs_vehicles_xygrad.png')
+    image6 = mpimg.imread('calibration_wide/test6.jpg')
 
     #img2 = cv2.imread('calibration_wide/test_image2.png')
 
@@ -204,18 +218,35 @@ def main():
     ##draw_images(img, top_down, 'Undistorted and Warped Image')
 
     # Run the function abs_sobel_thresh
-    grad_binary = abs_sobel_thresh(image,
-                                   orient='y',
-                                   thresh_min=20,
-                                   thresh_max=100)
-    draw_images(image, grad_binary, 'Thresholded Gradient', None)
+    gradx = abs_sobel_thresh(image,
+                             orient='x',
+                             thresh_min=20,
+                             thresh_max=100)
+    draw_images(image, gradx, 'Thresholded Gradient', 'gray')
+
+    # Run the function abs_sobel_thresh
+    grady = abs_sobel_thresh(image,
+                             orient='y',
+                             thresh_min=20,
+                             thresh_max=100)
+    draw_images(image, grady, 'Thresholded Gradient', 'gray')
 
     # Run the function
     mag_binary = mag_thresh(image, sobel_kernel=3, mag_thresh=(30, 100))
     draw_images(image, mag_binary, 'Thresholded Magnitude', 'gray')
 
+    # Run the function
     dir_binary = dir_threshold(image, sobel_kernel=15, thresh=(0.7, 1.3))
     draw_images(image, dir_binary, 'Thresholded Grad. Dir.', 'gray')
+
+    combined = np.zeros_like(dir_binary)
+    combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
+    draw_images(image, combined, 'Combined', 'gray')
+
+    hls_binary = hls_select(image6, thresh=(0, 255))
+    draw_images(image6, hls_binary, 'Thresholded S', 'gray')
+
+
 
 if __name__ == '__main__':
     main()
